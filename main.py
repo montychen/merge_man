@@ -4,7 +4,7 @@ from typing import Union
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse
 
 cur_dir = os.getcwd()   # 获取当前目录
 
@@ -21,6 +21,10 @@ def read_root():
 def read_root():
     # return {"Hello": "World"}
     return FileResponse(f"{cur_dir}/static/test.html", media_type="text/html")
+
+@app.get("/merge", response_class=PlainTextResponse)
+def read_root():
+    return "http://127.0.0.1:8000/static/img/girl1.png"
 
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Union[str, None] = None):
