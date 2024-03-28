@@ -17,6 +17,11 @@ def read_root():
     # return {"Hello": "World"}
     return FileResponse(f"{cur_dir}/static/index.html", media_type="text/html")
 
+@app.get("/test", response_class=HTMLResponse)
+def read_root():
+    # return {"Hello": "World"}
+    return FileResponse(f"{cur_dir}/static/test.html", media_type="text/html")
+
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
