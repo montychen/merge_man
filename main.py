@@ -6,6 +6,13 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse
 
+from pydantic import BaseModel
+
+class Body_Component(BaseModel):
+    group1: str
+    group2: str
+
+
 cur_dir = os.getcwd()   # 获取当前目录
 
 app = FastAPI()
@@ -18,12 +25,13 @@ def read_root():
     return FileResponse(f"{cur_dir}/static/index.html", media_type="text/html")
 
 @app.get("/test", response_class=HTMLResponse)
-def read_root():
+def test():
     # return {"Hello": "World"}
     return FileResponse(f"{cur_dir}/static/test.html", media_type="text/html")
 
-@app.get("/merge", response_class=PlainTextResponse)
-def read_root():
+@app.post("/merge", response_class=PlainTextResponse)
+def merge(body_com: Body_Component):
+    print(f"\n{body_com}\n")
     return "http://127.0.0.1:8000/static/img/girl1.png"
 
 @app.get("/items/{item_id}")
