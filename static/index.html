@@ -19,6 +19,7 @@
             width: 70%;
             padding: 20px;
             box-sizing: border-box;
+            overflow-y: auto; /* 内容超出时显示垂直滚动条 */
         }
         .right-panel {
             width: 30%;
@@ -27,6 +28,7 @@
             align-items: center;
             padding: 20px;
             box-sizing: border-box;
+            overflow-y: auto; /* 内容超出时显示垂直滚动条 */
         }
         .group {
             margin-bottom: 20px;
@@ -55,21 +57,22 @@
     <div class="left-panel">
 
         {% for body_com in body_com_list %}
-        <!-- [['头', ['27_head.png', '19_head.png', 'head.png', '31_head.png', '30_head.png']]] -->
-            {% set group_name = body_com[0] %}
-            <div class="group" id="{{ group_name }}">
-                <div>{{ body_com[0] }}</div>
+        <!-- [['头', "head", ['27_head.png', '19_head.png', 'head.png', '31_head.png', '30_head.png']]] -->
+            {% set group_title = body_com[0] %}
+            {% set group_id = body_com[1] %}
+            <div class="group" id="{{ group_id }}">
+                <div style="font-size: 30px;" >{{ group_title }}</div> 
 
-                {% for png_filename in body_com[1] %}
+                {% for png_filename in body_com[2] %}
                     {% set png_file_url = body_com_url_pre + '/' +  body_com[0] + '/' + png_filename %}
-                    <img src="{{ png_file_url  }}" alt="Option 1" data-value="{{ png_filename }}" onclick="selectImage('{{ group_name }}', this)">
+                    <img src="{{ png_file_url  }}" alt="Option 1" data-value="{{ png_filename }}" onclick="selectImage('{{ group_id }}', this)">
                 {% endfor %}
             </div>
 
         {% endfor %}
 
         <div class="actions">
-            <button onclick="submitSelection()">提交</button>
+            <button onclick="submitSelection()">提交</button><br><br>
             <!-- <button>保存</button> -->
         </div>
     </div>

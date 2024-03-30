@@ -14,24 +14,28 @@ app.mount("/static", StaticFiles(directory="static"), name="static") # 假设你
 
 templates = Jinja2Templates(directory="static")    # 声明 模板文件放在 static 目录下
 
-class Body_Component(BaseModel):   # 接收客户端 Post请求发过来的参数
-    group1: str
-    group2: str
 
- 
+
+class Body_Component(BaseModel):   # 接收客户端 Post请求发过来的参数
+    hair: str
+    head: str
+    expression: str
+    body: str
+    hand: str
+    foot: str
 
 
 def fill_body_com_list() -> list:
     # 收集：身体部件的目录名  和 它下面的png文件。   ["头",[这里会包含这个目录下所有的png文件名]] 
-    # [['头', ['27_head.png', '19_head.png', 'head.png', '31_head.png', '30_head.png']]]
-    body_com_list = [["头",[]],  ["表情",[]],  ["身体",[]],  ["手",[]],  ["腿脚",[]]  ]  
+    # [['头', "head", ['27_head.png', '19_head.png', 'head.png', '31_head.png', '30_head.png']]]
+    body_com_list = [["发型", "hair", []], ["头", "head", []],  ["表情", "expression", []],  ["身体", "body", []],  ["手", "hand", []],  ["腿脚", "foot", []]  ]  
     cur_dir = os.getcwd()   # 获取当前目录
     for item in body_com_list:
         file_dir = os.path.join(cur_dir, "static/body_com", item[0])
         # print(file_dir)
         for filename in os.listdir(file_dir):
             if filename.lower().endswith(".png"):
-                item[1].append(filename)
+                item[2].append(filename)
         # print( len(item[1]), "\n", item[1])
     return body_com_list
 
