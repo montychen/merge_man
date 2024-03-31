@@ -37,8 +37,7 @@ def change_filename(top_level_dir):
 
 # change_filename("/Users/dj/STUDY/mojo_study/body")
                 
-
-def merge_man():
+def get_selected_img():
     image_files = {
         'hair': '头发.png',
         'head': 'head.png',
@@ -52,13 +51,29 @@ def merge_man():
 
     base_dir = "/Users/dj/STUDY/merge_man/static/test_merge_img"
     # 加载所有图片
-    images = {name: Image.open(f"{base_dir}/{path}") for name, path in image_files.items()}
+    images =  {name: Image.open(f"{base_dir}/{path}") for name, path in image_files.items()}
 
-    # 假设所有图片大小相同，并获取宽高
-    width, height = images['body'].size
+    return images
+
+def result_man_width_height(images):   
+    # man_width = (left_hand + body + right_hand)的width之和
+    # man_height = (hair + head + body + left_leg)的height之和
+    man_width = images['left_hand'].size[0] + images['body'].size[0] + images['right_hand'].size[0] 
+    man_height = images['hair'].size[1] + images['head'].size[1] + images['body'].size[1] + images['left_leg'].size[1] 
+
+    print(man_width, "\t", man_height)
+    return man_width, man_height
+
+
+images = get_selected_img()
+man_width, man_height = result_man_width_height(images)
+
+def merge_man():
+    images = get_selected_img()
+    man_width, man_height = result_man_width_height(images)
 
     # 创建一个新的图像，背景透明
-    result_image = Image.new('RGBA', (width, 2 * height))
+    result_image = Image.new('RGBA', (man_width, man_height))
 
     # 将“身体”放在中间
     result_image.paste(images['body'], (0, height // 2))
@@ -81,4 +96,4 @@ def merge_man():
     # 保存结果图像
     result_image.save('完整的人体.png')
               
-merge_man()
+# merge_man()
