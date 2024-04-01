@@ -41,7 +41,7 @@ def get_selected_img():
     image_files = {
         'hair': '头发.png',
         'head': 'head.png',
-        'expression': '普通表情_15.png',
+        'expression': '普通表情_15.png',   # 表情
         'body': 'body.png',
         'left_hand': 'hand2.png',
         'right_hand': 'hand1.png',
@@ -49,11 +49,9 @@ def get_selected_img():
         'right_leg': 'foot1.png'
     }
 
-    base_dir = "/Users/dj/STUDY/merge_man/static/test_merge_img"
+    base_dir = os.path.join(os.getcwd(), "static/test_merge_img")
     # 加载所有图片
-    images =  {name: Image.open(f"{base_dir}/{path}") for name, path in image_files.items()}
-
-    return images
+    return  {name: Image.open(os.path.join(base_dir, path)) for name, path in image_files.items()}
 
 def result_man_width_height(images):   
     # man_width = (left_hand + body + right_hand)的width之和
@@ -65,35 +63,135 @@ def result_man_width_height(images):
     return man_width, man_height
 
 
-images = get_selected_img()
-man_width, man_height = result_man_width_height(images)
+# images = get_selected_img()
+# man_width, man_height = result_man_width_height(images)
 
-def merge_man():
+def head_left_top_pos(images):       # pil 坐标的原点在 左上角
+    # head_top_center = left_hand.width + body.width/2
+    head_top_center = images["left_hand"].size[0] + images["body"].size[0] // 2
+    head_left_top_x = head_top_center - images["head"].size[0] // 2
+    head_left_top_y = 0
+    return head_left_top_x, head_left_top_y
+
+def expression_left_top_pos(images):  # pil 坐标的原点在 左上角
+    head_x, head_y = head_left_top_pos(images)
+    head_width, head_height = images["head"].size
+    head_center_x, head_center_y = (head_x + head_width//2, head_y + head_height // 2)
+
+    EXPRESSION_INTO_FACE_X = 0
+    EXPRESSION_INTO_FACE_Y = 50
+    expression_left_top_x = head_center_x - images["expression"].size[0] // 2 + EXPRESSION_INTO_FACE_X
+    expression_left_top_y = head_center_y - images["expression"].size[1] // 2 + EXPRESSION_INTO_FACE_Y
+    print(images["head"].size, images["expression"].size )
+
+    return expression_left_top_x, expression_left_top_y
+
+def body_left_top_pos(images):  # pil 坐标的原点在 左上角
+    head_x, head_y = head_left_top_pos(images)
+    head_width, head_height = images["head"].size
+    head_center_x, head_center_y = (head_x + head_width//2, head_y + head_height // 2)
+
+    body_left_top_x = head_center_x - images["body"].size[0] // 2
+    body_left_top_y = head_center_y + head_height // 2
+
+    BODY_INTO_HEAD = 120   # 头要压在脖子上面
+    return body_left_top_x, body_left_top_y - BODY_INTO_HEAD
+
+def left_hand_top_pos(images):
+    body_x, body_y = body_left_top_pos(images)
+
+    LEFT_HAND_INTO_BODY_X = 100
+    LEFT_HAND_INTO_BODY_Y = 300
+
+    left_hand_x = body_x + LEFT_HAND_INTO_BODY_X
+    left_hand_y = body_y + LEFT_HAND_INTO_BODY_Y
+    return left_hand_x, left_hand_y
+
+def right_hand_top_pos(images):
+    body_x, body_y = body_left_top_pos(images)
+
+    RIGHT_HAND_INTO_BODY_X = 500
+    RIGHT_HAND_INTO_BODY_Y = 350
+
+    right_hand_x = body_x + RIGHT_HAND_INTO_BODY_X
+    right_hand_y = body_y + RIGHT_HAND_INTO_BODY_Y
+    return right_hand_x, right_hand_y
+
+def left_leg_pos(images):
+    body_x, body_y = body_left_top_pos(images)
+
+    LEFT_LEG_INTO_BODY_X = 150
+    LEFT_LEG_INTO_BODY_Y = 100
+
+    left_leg_x = body_x + LEFT_LEG_INTO_BODY_X
+    left_leg_y = body_y + images["body"].size[1] - LEFT_LEG_INTO_BODY_Y
+    return left_leg_x, left_leg_y
+
+def right_leg_pos(images):
+    body_x, body_y = body_left_top_pos(images)
+
+    RIGHT_LEG_INTO_BODY_X = 150
+    RIGHT_LEG_INTO_BODY_Y = 100
+
+    right_leg_x = body_x + images["head"].size[0] - RIGHT_LEG_INTO_BODY_X
+    right_leg_y = body_y + images["body"].size[1] - RIGHT_LEG_INTO_BODY_Y
+    return right_leg_x, right_leg_y
+
+def merge_man():   # pil 坐标的原点在 左上角
     images = get_selected_img()
     man_width, man_height = result_man_width_height(images)
 
     # 创建一个新的图像，背景透明
     result_image = Image.new('RGBA', (man_width, man_height))
 
-    # 将“身体”放在中间
-    result_image.paste(images['body'], (0, height // 2))
+   
+    result_image.paste(images['left_leg'], left_leg_pos(images), mask=images['left_leg'])  # 左脚
+    result_image.paste(images['right_leg'], right_leg_pos(images), mask=images['right_leg'])  # 右脚
 
-    # 将“头”放在“身体”上方，将“表情”覆盖在“头”上
-    head_y = height // 2 - images['head'].height
-    result_image.paste(images['head'], (0, head_y), images['head'])
-    result_image.paste(images['expression'], (0, head_y), images['expression'])
+    
+    result_image.paste(images['right_hand'], right_hand_top_pos(images), mask=images['right_hand'])  # 右手
+    
+    result_image.paste(images['body'], body_left_top_pos(images), mask=images['body'])  # 身体
+    result_image.paste(images['head'], head_left_top_pos(images), mask=images['head'])  # 头
+    result_image.paste(images['expression'], expression_left_top_pos(images), mask=images['expression'])  # 表情
+    result_image.paste(images['left_hand'], left_hand_top_pos(images), mask=images['left_hand'])  # 左手
 
-    # 将“左手”和“右手”放在“身体”的两侧
-    # 注意：可能需要根据实际图片调整手的精确位置
-    result_image.paste(images['left_hand'], (-width // 4, height // 2), images['left_hand'])
-    result_image.paste(images['right_hand'], (width // 4 * 3, height // 2), images['right_hand'])
 
-    # 将“左腿”和“右腿”放在“身体”下方
-    # 注意：可能需要根据实际图片调整腿的精确位置
-    result_image.paste(images['left_leg'], (0, height // 2 * 3), images['left_leg'])
-    result_image.paste(images['right_leg'], (width // 2, height // 2 * 3), images['right_leg'])
+
+
+
 
     # 保存结果图像
     result_image.save('完整的人体.png')
+    result_image.show()
               
-# merge_man()
+merge_man()
+    
+def test_paste():
+
+    base_dir = os.path.join(os.getcwd(), "static")
+
+    nomask_bg = Image.open(os.path.join(base_dir, "img/girl0.jpg"))
+    mask_bg = Image.open(os.path.join(base_dir, "img/girl0.jpg"))
+    hair = Image.open(os.path.join(base_dir, "test_merge_img/头发.png"))
+
+    nomask_bg.paste(hair)
+    mask_bg.paste(hair, mask=hair)     # mask：遮罩、掩膜图像。 遮罩的透明区域不合成， 透明的部分保持透明
+
+    # nomask_bg.save("nomask_bg.png")
+    mask_bg.save("mask_bg.png")
+
+    mask_bg.show()
+    nomask_bg.show()
+
+# test_paste()
+    
+def img_flip_left_reght():
+    images = get_selected_img()
+    img = images["right_hand"].transpose(Image.FLIP_LEFT_RIGHT)
+    img.save("rhand.png")
+    img.show()
+
+
+# img_flip_left_reght()
+
