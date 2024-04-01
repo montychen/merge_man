@@ -22,7 +22,7 @@ class Body_Component(BaseModel):   # 接收客户端 Post请求发过来的参�
     expression: str
 
     body: str
-    
+
     lhand: str    # 左手
     rhand: str    # 右手
     lfoot: str    # 左腿
@@ -38,7 +38,12 @@ def fill_body_com_list() -> list:
     for item in body_com_list:
         file_dir = os.path.join(cur_dir, "static/body_com", item[0])
         # print(file_dir)
-        for filename in os.listdir(file_dir):
+
+        files =  os.listdir(file_dir)
+        png_files = [f for f in files if f.endswith(".png")]
+        sorted_files = sorted(png_files) # 对文件列表进行排序
+
+        for filename in sorted_files:
             if filename.lower().endswith(".png"):
                 item[2].append(filename)
         # print( len(item[1]), "\n", item[1])

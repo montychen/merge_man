@@ -157,15 +157,11 @@ def merge_man():   # pil 坐标的原点在 左上角
     result_image.paste(images['left_hand'], left_hand_top_pos(images), mask=images['left_hand'])  # 左手
 
 
-
-
-
-
     # 保存结果图像
     result_image.save('完整的人体.png')
     result_image.show()
               
-merge_man()
+# merge_man()
     
 def test_paste():
 
@@ -195,3 +191,22 @@ def img_flip_left_reght():
 
 # img_flip_left_reght()
 
+
+
+def sorted_file():
+    # 获取当前目录下的所有文件和目录
+    dir = os.path.join(os.getcwd(), "static/body_com/头")
+
+    items =  os.listdir(dir)
+
+    # 过滤出所有文件（排除目录）
+    files = [item for item in items if item.endswith(".png")]
+
+    # 对文件列表进行排序
+    sorted_files = sorted(files)
+
+    # 打印排序后的文件列表
+    for file in sorted_files:
+        print(file)
+
+sorted_file()
