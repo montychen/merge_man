@@ -1,5 +1,7 @@
 捏人  使用 [PIL库（现在称为Pillow）](https://github.com/python-pillow/Pillow)
 
+使用的是 python 3.10 版本
+
 ### 安装依赖
 ```
 pip install --upgrade Pillow
@@ -59,7 +61,7 @@ sudo nginx -t
 
 #### 运行
 ```
-gunicorn main:app -c ./gunicorn.py
+gunicorn main:app -c ./gunicorn.py             # 这个命令要进入merge_man目录，在运行
 
 sudo nginx
 ```
