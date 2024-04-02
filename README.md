@@ -1,4 +1,4 @@
-捏人  使用 [Pil的后续版本 Pillow](https://github.com/python-pillow/Pillow)
+捏人  使用 [PIL库（现在称为Pillow）](https://github.com/python-pillow/Pillow)
 
 ### 安装依赖
 

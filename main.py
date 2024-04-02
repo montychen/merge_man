@@ -92,6 +92,11 @@ def result_man_width_height(images):
 # images = get_selected_img()
 # man_width, man_height = result_man_width_height(images)
 
+def hair_pos(images):   # pil 坐标的原点在 左上角
+    hair_x, hair_y = head_left_top_pos(images)
+
+    return hair_x, hair_y
+
 def head_left_top_pos(images):       # pil 坐标的原点在 左上角
     # head_top_center = left_hand.width + body.width/2
     head_top_center = images["left_hand"].size[0] + images["body"].size[0] // 2
@@ -106,11 +111,25 @@ def expression_left_top_pos(images):  # pil 坐标的原点在 左上角
 
     EXPRESSION_INTO_FACE_X = 0
     EXPRESSION_INTO_FACE_Y = 50
+
     expression_left_top_x = head_center_x - images["expression"].size[0] // 2 + EXPRESSION_INTO_FACE_X
     expression_left_top_y = head_center_y - images["expression"].size[1] // 2 + EXPRESSION_INTO_FACE_Y
     print(images["head"].size, images["expression"].size )
 
     return expression_left_top_x, expression_left_top_y
+
+def expression_left_top_pos_enlarge(images):  # pil 坐标的原点在 左上角
+    head_x, head_y = head_left_top_pos(images)
+    head_width, head_height = images["head"].size
+    head_center_x, head_center_y = (head_x + head_width//2, head_y + head_height // 2)
+
+    EXPRESSION_INTO_FACE_X = 0
+    EXPRESSION_INTO_FACE_Y = 0
+
+    expression_left_top_x = head_center_x - images["expression"].size[0]  + EXPRESSION_INTO_FACE_X
+    expression_left_top_y = head_center_y - images["expression"].size[1]*3 // 4  + EXPRESSION_INTO_FACE_Y
+
+    return expression_left_top_x, expression_left_top_y 
 
 def body_left_top_pos(images):  # pil 坐标的原点在 左上角
     head_x, head_y = head_left_top_pos(images)
@@ -126,8 +145,8 @@ def body_left_top_pos(images):  # pil 坐标的原点在 左上角
 def left_hand_top_pos(images):
     body_x, body_y = body_left_top_pos(images)
 
-    LEFT_HAND_INTO_BODY_X = 100
-    LEFT_HAND_INTO_BODY_Y = 300
+    LEFT_HAND_INTO_BODY_X = -80   # 100
+    LEFT_HAND_INTO_BODY_Y = 320    # 300
 
     left_hand_x = body_x + LEFT_HAND_INTO_BODY_X
     left_hand_y = body_y + LEFT_HAND_INTO_BODY_Y
@@ -135,18 +154,20 @@ def left_hand_top_pos(images):
 
 def right_hand_top_pos(images):
     body_x, body_y = body_left_top_pos(images)
+    body_width, body_height = images["body"].size
 
-    RIGHT_HAND_INTO_BODY_X = 500
-    RIGHT_HAND_INTO_BODY_Y = 350
 
-    right_hand_x = body_x + RIGHT_HAND_INTO_BODY_X
+    RIGHT_HAND_INTO_BODY_X = 50   #  500
+    RIGHT_HAND_INTO_BODY_Y = 300    # 350
+
+    right_hand_x = body_x + body_width//3 + RIGHT_HAND_INTO_BODY_X
     right_hand_y = body_y + RIGHT_HAND_INTO_BODY_Y
     return right_hand_x, right_hand_y
 
 def left_leg_pos(images):
     body_x, body_y = body_left_top_pos(images)
 
-    LEFT_LEG_INTO_BODY_X = 150
+    LEFT_LEG_INTO_BODY_X = 50
     LEFT_LEG_INTO_BODY_Y = 100
 
     left_leg_x = body_x + LEFT_LEG_INTO_BODY_X
@@ -156,12 +177,20 @@ def left_leg_pos(images):
 def right_leg_pos(images):
     body_x, body_y = body_left_top_pos(images)
 
-    RIGHT_LEG_INTO_BODY_X = 150
+    RIGHT_LEG_INTO_BODY_X = 300
     RIGHT_LEG_INTO_BODY_Y = 100
 
-    right_leg_x = body_x + images["head"].size[0] - RIGHT_LEG_INTO_BODY_X
+    right_leg_x = body_x + images["head"].size[0]//2 - RIGHT_LEG_INTO_BODY_X
     right_leg_y = body_y + images["body"].size[1] - RIGHT_LEG_INTO_BODY_Y
     return right_leg_x, right_leg_y
+
+
+def resize_img(img, factor = 2):  # 放大图片，默认放大2倍
+    width, height = round(img.width * factor), round(img.height * factor)
+    return img.resize((width, height))
+
+
+
 
 def merge_man(images):   # pil 坐标的原点在 左上角
     man_width, man_height = result_man_width_height(images)
@@ -174,12 +203,20 @@ def merge_man(images):   # pil 坐标的原点在 左上角
     result_image.paste(images['right_leg'], right_leg_pos(images), mask=images['right_leg'])  # 右脚
 
     
-    result_image.paste(images['right_hand'], right_hand_top_pos(images), mask=images['right_hand'])  # 右手
-    
+    result_image.paste(images['left_hand'], left_hand_top_pos(images), mask=images['left_hand'])  # 左手
+
     result_image.paste(images['body'], body_left_top_pos(images), mask=images['body'])  # 身体
     result_image.paste(images['head'], head_left_top_pos(images), mask=images['head'])  # 头
-    result_image.paste(images['expression'], expression_left_top_pos(images), mask=images['expression'])  # 表情
-    result_image.paste(images['left_hand'], left_hand_top_pos(images), mask=images['left_hand'])  # 左手
+
+    # result_image.paste(images['expression'], expression_left_top_pos(images), mask=images['expression'])  # 表情
+    # 默认提供的表情图片太小，先放大
+    result_image.paste(resize_img(images['expression']), expression_left_top_pos_enlarge(images), mask=resize_img(images['expression']))  # 表情
+
+
+    # result_image.paste(images['hair'], head_left_top_pos(images), mask=images['hair'])  # 头发
+
+    result_image.paste(images['right_hand'], right_hand_top_pos(images), mask=images['right_hand'])  # 右手
+
 
 
     # 保存结果图像

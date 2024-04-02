@@ -209,4 +209,15 @@ def sorted_file():
     for file in sorted_files:
         print(file)
 
-sorted_file()
+# sorted_file()
+        
+def resize_img():
+    file = os.path.join(os.getcwd(), "static/test_merge_img/普通表情_15.png")
+    with Image.open(file) as im:
+        # Provide the target width and height of the image
+        width, height = round(im.width *1.5), round(im.height * 1.5)
+        im_resized = im.resize((width, height))
+        im_resized.show()
+        im.show()
+
+resize_img()
