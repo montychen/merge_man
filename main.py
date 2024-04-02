@@ -64,15 +64,17 @@ class Body_Component(BaseModel):   # 接收客户端 Post请求发过来的参�
 
 def get_selected_img(body_select):    
     # 加载所有选择的图片
+    cwd = os.getcwd()
+
     selected_images = {
-        "hair": Image.open(os.path.join(os.getcwd(), "static/body_com/发型", body_select.hair)),
-        "head": Image.open(os.path.join(os.getcwd(), "static/body_com/头", body_select.head)),
-        "expression": Image.open(os.path.join(os.getcwd(), "static/body_com/表情", body_select.expression)),
-        "body": Image.open(os.path.join(os.getcwd(), "static/body_com/身体", body_select.body)),
-        "left_hand": Image.open(os.path.join(os.getcwd(), "static/body_com/左手", body_select.left_hand)),
-        "right_hand": Image.open(os.path.join(os.getcwd(), "static/body_com/右手", body_select.right_hand)),
-        "left_leg": Image.open(os.path.join(os.getcwd(), "static/body_com/左腿", body_select.left_leg)),
-        "right_leg": Image.open(os.path.join(os.getcwd(), "static/body_com/右腿", body_select.right_leg)),
+        "hair": Image.open(os.path.join(cwd, "static/body_com/发型", body_select.hair)),
+        "head": Image.open(os.path.join(cwd, "static/body_com/头", body_select.head)),
+        "expression": Image.open(os.path.join(cwd, "static/body_com/表情", body_select.expression)),
+        "body": Image.open(os.path.join(cwd, "static/body_com/身体", body_select.body)),
+        "left_hand": Image.open(os.path.join(cwd, "static/body_com/左手", body_select.left_hand)),
+        "right_hand": Image.open(os.path.join(cwd, "static/body_com/右手", body_select.right_hand)),
+        "left_leg": Image.open(os.path.join(cwd, "static/body_com/左腿", body_select.left_leg)),
+        "right_leg": Image.open(os.path.join(cwd, "static/body_com/右腿", body_select.right_leg)),
     }
     return selected_images
 
@@ -195,7 +197,7 @@ def left_leg_pos(images):
 def right_leg_pos(images):
     body_x, body_y = body_left_top_pos(images)
 
-    RIGHT_LEG_INTO_BODY_X = 330
+    RIGHT_LEG_INTO_BODY_X = 420
     RIGHT_LEG_INTO_BODY_Y = 110
 
     right_leg_x = body_x + images["body"].size[0] - RIGHT_LEG_INTO_BODY_X
@@ -210,7 +212,7 @@ def resize_img(img, factor = 2):  # 放大图片，默认放大2倍
 
 
 
-def merge_man(images):   # pil 坐标的原点在 左上角
+def merge_man(images, have_hair = True):   # pil 坐标的原点在 左上角
     man_width, man_height = result_man_width_height(images)
 
     # 创建一个新的图像，背景透明
@@ -230,8 +232,8 @@ def merge_man(images):   # pil 坐标的原点在 左上角
     # 默认提供的表情图片太小，先放大
     result_image.paste(resize_img(images['expression']), expression_left_top_pos_enlarge(images), mask=resize_img(images['expression']))  # 表情
 
-
-    result_image.paste(resize_hair(images), hair_top_pos(images), mask=resize_hair(images))  # 头发
+    if have_hair: 
+        result_image.paste(resize_hair(images), hair_top_pos(images), mask=resize_hair(images))  # 头发
 
     result_image.paste(images['right_hand'], right_hand_top_pos(images), mask=images['right_hand'])  # 右手
 
@@ -247,7 +249,7 @@ def merge_man(images):   # pil 坐标的原点在 左上角
 def merge(body_com: Body_Component):
     print(f"\n{body_com}\n")
     selected_images = get_selected_img(body_com)
-    merge_man(selected_images)
+    merge_man(selected_images, have_hair=body_com.hair != "0_NO_HAIR.png")
     return "http://127.0.0.1:8000/static/result_image.png"
 
 

@@ -189,7 +189,7 @@ def img_flip_left_reght():
     img.show()
 
 
-img_flip_left_reght()
+# img_flip_left_reght()
 
 
 
@@ -211,13 +211,14 @@ def sorted_file():
 
 # sorted_file()
         
-def resize_img(img, factor = 1):
-    file = os.path.join(os.getcwd(), "static/test_merge_img/普通表情_15.png")
+def resize_img():
+    file = os.path.join(os.getcwd(), "static/body_com/发型/hair1.png")
+    factor = 2
     with Image.open(file) as im:
-        # Provide the target width and height of the image
-        width, height = round(im.width *1.5), round(im.height * 1.5)
+        width, height = round(im.width * factor), round(im.height * factor)
         im_resized = im.resize((width, height))
-        im_resized.show()
-        im.show()
+        im_resized.save(os.path.join(os.getcwd(), "static/body_com/发型/hair1_resize.png"))
+        # im_resized.show()
+        # im.show()
 
-# resize_img()
+resize_img()
