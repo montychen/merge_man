@@ -250,7 +250,7 @@ def merge(body_com: Body_Component):
     print(f"\n{body_com}\n")
     selected_images = get_selected_img(body_com)
     merge_man(selected_images, have_hair=body_com.hair != "0_NO_HAIR.png")
-    return "http://127.0.0.1:8000/static/result_image.png"
+    return "static/result_image.png"
 
 
 
