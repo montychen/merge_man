@@ -68,7 +68,6 @@
                     <img src="{{ png_file_url  }}" alt="Option 1" data-value="{{ png_filename }}" onclick="selectImage('{{ group_id }}', this)">
                 {% endfor %}
             </div>
-
         {% endfor %}
 
         <div class="actions">
@@ -98,6 +97,8 @@
             img.classList.remove('selected');
         });
         selectedImage.classList.add('selected');
+
+        submitSelection()   // 改变选择就提交到服务端
     }
 
     function submitSelection() {
@@ -121,8 +122,10 @@
         .then(response => response.text()) // 使用response.text()而不是response.json()
         .then(data => {
             console.log('Success:', data);
-            // 直接使用返回的字符串作为新图片的URL
-            document.getElementById('displayedImage').src = data;
+            // 要强制刷新 "displayedImage" 的内容，在url中添加一个基于时间的查询字符串。浏览器都会认为这是一个全新的URL，从而绕过缓存并重新加载图片
+            var new_url = data + '?timestamp=' + new Date().getTime();  // 为URL添加一个基于当前时间的唯一查询参数. 
+            document.getElementById('displayedImage').src = new_url;    // 直接使用返回的字符串作为新图片的URL
+
         })
         .catch((error) => {
             console.error('Error:', error);
