@@ -183,13 +183,13 @@ def test_paste():
 # test_paste()
     
 def img_flip_left_reght():
-    images = get_selected_img()
-    img = images["right_hand"].transpose(Image.FLIP_LEFT_RIGHT)
-    img.save("rhand.png")
+    file = os.path.join(os.getcwd(), "static/body_com/发型/头发 4.png")
+    img = Image.open(file).transpose(Image.FLIP_LEFT_RIGHT)
+    img.save(os.path.join(os.getcwd(), "static/body_com/发型/头发 4_mirror.png"))
     img.show()
 
 
-# img_flip_left_reght()
+img_flip_left_reght()
 
 
 
@@ -211,7 +211,7 @@ def sorted_file():
 
 # sorted_file()
         
-def resize_img():
+def resize_img(img, factor = 1):
     file = os.path.join(os.getcwd(), "static/test_merge_img/普通表情_15.png")
     with Image.open(file) as im:
         # Provide the target width and height of the image
@@ -220,4 +220,4 @@ def resize_img():
         im_resized.show()
         im.show()
 
-resize_img()
+# resize_img()

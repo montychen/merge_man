@@ -92,17 +92,33 @@ def result_man_width_height(images):
 # images = get_selected_img()
 # man_width, man_height = result_man_width_height(images)
 
-def hair_pos(images):   # pil 坐标的原点在 左上角
-    hair_x, hair_y = head_left_top_pos(images)
-
-    return hair_x, hair_y
-
+HEAD_SHIFT_DOWN = 30 # 头下余，预留位置给头发
+HAIR_LARGER_THAN_HEAD = 0.06 # 头发比头大 10%
+# 先确定头的位置， 后续身体部件的位置，都是以头的位置作为参考
 def head_left_top_pos(images):       # pil 坐标的原点在 左上角
     # head_top_center = left_hand.width + body.width/2
     head_top_center = images["left_hand"].size[0] + images["body"].size[0] // 2
     head_left_top_x = head_top_center - images["head"].size[0] // 2
-    head_left_top_y = 0
+
+    
+
+    head_left_top_y = HEAD_SHIFT_DOWN
     return head_left_top_x, head_left_top_y
+
+
+def resize_hair(images):
+    hair_widge = images["hair"].size[0]
+    head_widge = images["head"].size[0]
+    return resize_img(images["hair"], factor = head_widge/hair_widge + HAIR_LARGER_THAN_HEAD )
+
+def hair_top_pos(images):   # pil 坐标的原点在 左上角
+    hair_x, hair_y = head_left_top_pos(images)
+
+    HAIR_LEFT_SHIFT_THAN_HEAD = HAIR_LARGER_THAN_HEAD/2 # 头发起始位置比头的位置往左偏移一点
+
+    hair_x = hair_x - round(images["head"].size[0] * HAIR_LEFT_SHIFT_THAN_HEAD)
+    hair_y = hair_y - HEAD_SHIFT_DOWN
+    return hair_x, hair_y
 
 def expression_left_top_pos(images):  # pil 坐标的原点在 左上角
     head_x, head_y = head_left_top_pos(images)
@@ -136,7 +152,9 @@ def body_left_top_pos(images):  # pil 坐标的原点在 左上角
     head_width, head_height = images["head"].size
     head_center_x, head_center_y = (head_x + head_width//2, head_y + head_height // 2)
 
-    body_left_top_x = head_center_x - images["body"].size[0] // 2
+    BODY_LEFT_SHIFT = 50
+
+    body_left_top_x = head_center_x - images["body"].size[0] // 2 - BODY_LEFT_SHIFT
     body_left_top_y = head_center_y + head_height // 2
 
     BODY_INTO_HEAD = 120   # 头要压在脖子上面
@@ -145,10 +163,10 @@ def body_left_top_pos(images):  # pil 坐标的原点在 左上角
 def left_hand_top_pos(images):
     body_x, body_y = body_left_top_pos(images)
 
-    LEFT_HAND_INTO_BODY_X = -80   # 100
+    LEFT_HAND_INTO_BODY_X = 80   # 100
     LEFT_HAND_INTO_BODY_Y = 320    # 300
 
-    left_hand_x = body_x + LEFT_HAND_INTO_BODY_X
+    left_hand_x = body_x - LEFT_HAND_INTO_BODY_X
     left_hand_y = body_y + LEFT_HAND_INTO_BODY_Y
     return left_hand_x, left_hand_y
 
@@ -167,8 +185,8 @@ def right_hand_top_pos(images):
 def left_leg_pos(images):
     body_x, body_y = body_left_top_pos(images)
 
-    LEFT_LEG_INTO_BODY_X = 50
-    LEFT_LEG_INTO_BODY_Y = 100
+    LEFT_LEG_INTO_BODY_X = 40
+    LEFT_LEG_INTO_BODY_Y = 110
 
     left_leg_x = body_x + LEFT_LEG_INTO_BODY_X
     left_leg_y = body_y + images["body"].size[1] - LEFT_LEG_INTO_BODY_Y
@@ -177,10 +195,10 @@ def left_leg_pos(images):
 def right_leg_pos(images):
     body_x, body_y = body_left_top_pos(images)
 
-    RIGHT_LEG_INTO_BODY_X = 300
-    RIGHT_LEG_INTO_BODY_Y = 100
+    RIGHT_LEG_INTO_BODY_X = 330
+    RIGHT_LEG_INTO_BODY_Y = 110
 
-    right_leg_x = body_x + images["head"].size[0]//2 - RIGHT_LEG_INTO_BODY_X
+    right_leg_x = body_x + images["body"].size[0] - RIGHT_LEG_INTO_BODY_X
     right_leg_y = body_y + images["body"].size[1] - RIGHT_LEG_INTO_BODY_Y
     return right_leg_x, right_leg_y
 
@@ -213,7 +231,7 @@ def merge_man(images):   # pil 坐标的原点在 左上角
     result_image.paste(resize_img(images['expression']), expression_left_top_pos_enlarge(images), mask=resize_img(images['expression']))  # 表情
 
 
-    # result_image.paste(images['hair'], head_left_top_pos(images), mask=images['hair'])  # 头发
+    result_image.paste(resize_hair(images), hair_top_pos(images), mask=resize_hair(images))  # 头发
 
     result_image.paste(images['right_hand'], right_hand_top_pos(images), mask=images['right_hand'])  # 右手
 
